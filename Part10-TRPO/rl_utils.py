@@ -83,6 +83,7 @@ def compute_advantage(gamma, lmbda, td_delta):
     advantage_list = []
     advantage = 0.0
     for delta in td_delta[::-1]:
+        # 使用广义优势估计公式计算每个时间步的优势值
         advantage = gamma * lmbda * advantage + delta
         advantage_list.append(advantage)
     advantage_list.reverse()
