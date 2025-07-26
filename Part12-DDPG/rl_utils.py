@@ -3,14 +3,6 @@ import numpy as np
 import torch
 import collections
 import random
-import os
-import shutil
-
-def recreate_directory(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-        print(f"Directory deleted: {path}")
-    os.makedirs(path, exist_ok=True)
 
 class ReplayBuffer:
     def __init__(self, capacity):
@@ -58,7 +50,7 @@ def train_on_policy_agent(env, agent, num_episodes):
                 agent.update(transition_dict)
                 if (i_episode+1) % 10 == 0:
                     pbar.set_postfix({'episode': '%d' % (num_episodes/10 * i + i_episode+1), 'return': '%.3f' % np.mean(return_list[-10:])})
-                pbar.update(1)                                              
+                pbar.update(1)
     return return_list
 
 def train_off_policy_agent(env, agent, num_episodes, replay_buffer, minimal_size, batch_size):
