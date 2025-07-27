@@ -58,11 +58,11 @@ class DQN:
         return self.q_net(state).max().item()
 
     def update(self, transition_dict):
-        states = torch.tensor(transition_dict['states'], dtype=torch.float).to(self.device)
-        actions = torch.tensor(transition_dict['actions']).view(-1,1).to(self.device)
-        rewards = torch.tensor(transition_dict['rewards'], dtype=torch.float).view(-1,1).to(self.device)
-        next_states = torch.tensor(transition_dict['next_states'], dtype=torch.float).to(self.device)
-        dones = torch.tensor(transition_dict['dones'], dtype=torch.float).view(-1,1).to(self.device)
+        states = torch.tensor(np.array(transition_dict['states']), dtype=torch.float).to(self.device)
+        actions = torch.tensor(np.array(transition_dict['actions'])).view(-1,1).to(self.device)
+        rewards = torch.tensor(np.array(transition_dict['rewards']), dtype=torch.float).view(-1,1).to(self.device)
+        next_states = torch.tensor(np.array(transition_dict['next_states']), dtype=torch.float).to(self.device)
+        dones = torch.tensor(np.array(transition_dict['dones']), dtype=torch.float).view(-1,1).to(self.device)
 
         q_values = self.q_net(states).gather(1, actions)
 
@@ -155,7 +155,7 @@ def train_DQN(agent, env, num_episodes, replay_buffer, minimal_size, batch_size)
 
 random.seed(0)
 np.random.seed(0)
-
+env.reset(seed = 0)[0]
 torch.manual_seed(0)
 replay_buffer = rl_utils.ReplayBuffer(buffer_size)
 agent = DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon, target_update, device, 'DoubleDQN')
@@ -166,7 +166,7 @@ plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('Double DQN on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part7-Optimized-DQN/Double-DQN_Pendulum-v1.png')
 
 frames_lsit = list(range(len(max_q_value_list)))
 plt.plot(frames_lsit, max_q_value_list)
@@ -175,4 +175,4 @@ plt.axhline(10, c='red', ls='--')
 plt.xlabel('Frames')
 plt.ylabel('Q value')
 plt.title('Double DQN on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part7-Optimized-DQN/Double-DQN_Pendulum-v1_moving_average.png')

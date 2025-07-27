@@ -37,7 +37,7 @@ class ActorCritic:
         self.device = device
 
     def take_action(self, state):
-        state = torch.tensor([state], dtype=torch.float).to(self.device)
+        state = torch.tensor(np.array([state]), dtype=torch.float).to(self.device)
 
         # 通常，它会使用 softmax 函数将神经网络的原始输出（logits）转化为一组在 [0, 1] 之间的概率值，且概率总和为 1
         probs = self.actor(state)
@@ -51,11 +51,11 @@ class ActorCritic:
 
     def update(self, transition_dict):
         # 将当前获取的数据进行转换，然后输入到网络中 
-        states = torch.tensor(transition_dict['states'], dtype=torch.float).to(self.device)
-        actions = torch.tensor(transition_dict['actions']).view(-1, 1).to(self.device) # view(-1, 1) 确保张量形状为二维列向量，方便后续计算
-        rewards = torch.tensor(transition_dict['rewards'], dtype=torch.float).view(-1, 1).to(self.device) 
-        next_states = torch.tensor(transition_dict['next_states'], dtype=torch.float).to(self.device)
-        dones = torch.tensor(transition_dict['dones'], dtype=torch.float).view(-1, 1).to(self.device)
+        states = torch.tensor(np.array(transition_dict['states']), dtype=torch.float).to(self.device)
+        actions = torch.tensor(np.array(transition_dict['actions'])).view(-1, 1).to(self.device) # view(-1, 1) 确保张量形状为二维列向量，方便后续计算
+        rewards = torch.tensor(np.array(transition_dict['rewards']), dtype=torch.float).view(-1, 1).to(self.device) 
+        next_states = torch.tensor(np.array(transition_dict['next_states']), dtype=torch.float).to(self.device)
+        dones = torch.tensor(np.array(transition_dict['dones']), dtype=torch.float).view(-1, 1).to(self.device)
 
         # 时序差分目标
         td_target = rewards + self.gamma * self.critic(next_states) * (1 - dones)
@@ -94,9 +94,9 @@ hidden_dim = 128
 gamma = 0.98
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-env_name = 'CartPole-v0'
+env_name = 'CartPole-v1'    
 env = gym.make(env_name)
-env.seed(0)
+env.reset(seed = 0)[0]
 torch.manual_seed(0)
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
@@ -109,11 +109,11 @@ plt.plot(episodes_list, return_list)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('Actor-Critic on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part9-Actor-Critic/Actor-Critic_CartPole-v1.png')
 
 mv_return = rl_utils.moving_average(return_list, 9)
 plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('Actor-Critic on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part9-Actor-Critic/Actor-Critic_CartPole-v1_moving_average.png')

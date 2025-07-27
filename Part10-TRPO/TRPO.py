@@ -45,7 +45,7 @@ class TRPO:
         self.device = device
 
     def take_action(self, state):
-        state = torch.tensor([state], dtype=torch.float).to(self.device)
+        state = torch.tensor(np.array([state]), dtype=torch.float).to(self.device)
         probs = self.actor(state)
         action_dist = torch.distributions.Categorical(probs)
         action = action_dist.sample()
@@ -133,11 +133,11 @@ class TRPO:
 
     def update(self, transition_dict):
         # 1. 数据预处理
-        states = torch.tensor(transition_dict['states'], dtype=torch.float).to(self.device)
-        actions = torch.tensor(transition_dict['actions']).view(-1, 1).to(self.device)
-        rewards = torch.tensor(transition_dict['rewards'], dtype=torch.float).view(-1, 1).to(self.device)
-        next_states = torch.tensor(transition_dict['next_states'], dtype=torch.float).to(self.device)
-        dones = torch.tensor(transition_dict['dones'], dtype=torch.float).view(-1, 1).to(self.device)
+        states = torch.tensor(np.array(transition_dict['states']), dtype=torch.float).to(self.device)
+        actions = torch.tensor(np.array(transition_dict['actions'])).view(-1, 1).to(self.device)
+        rewards = torch.tensor(np.array(transition_dict['rewards']), dtype=torch.float).view(-1, 1).to(self.device)
+        next_states = torch.tensor(np.array(transition_dict['next_states']), dtype=torch.float).to(self.device)
+        dones = torch.tensor(np.array(transition_dict['dones']), dtype=torch.float).view(-1, 1).to(self.device)
 
         # 2. 计算 TD 目标和 TD 误差
         td_target = rewards + self.gamma * self.critic(next_states) * (1 - dones)
@@ -184,9 +184,9 @@ alpha = 0.5
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-env_name = 'CartPole-v0'
+env_name = 'CartPole-v1'
 env = gym.make(env_name)
-env.seed(0)
+env.reset(seed = 0)[0]
 
 # 设置 PyTorch 的全局随机数生成器的种子
 # 通过设置随机数生成器的种子，你可以确保每次运行代码时生成的随机数序列是相同的，从而使实验结果具有可重复性
@@ -202,12 +202,12 @@ plt.plot(episodes_list, return_list)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('TRPO on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part10-TRPO/TRPO_CartPole-v1.png')
 
 mv_return = rl_utils.moving_average(return_list, 9)
 plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('TRPO on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part10-TRPO/TRPO_CartPole-v1_moving_average.png')
 

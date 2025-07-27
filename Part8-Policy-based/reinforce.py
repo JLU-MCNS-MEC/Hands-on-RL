@@ -59,7 +59,7 @@ class REINFORCE:
         # 反向遍历经验数据，从最后一步开始计算。这是因为在策略梯度方法中，回报是从当前时间步到回合结束的累积奖励
         for i in reversed(range(len(reward_list))):
             reward = reward_list[i]
-            state = torch.tensor([state_list[i]], dtype=torch.float).to(self.device)
+            state = torch.tensor(np.array([state_list[i]]), dtype=torch.float).to(self.device)
             action = torch.tensor([action_list[i]]).view(-1, 1).to(self.device)
             log_prob = torch.log(self.policy_net(state).gather(1, action)) # 计算当前状态下选择动作的对数概率
             G = self.gamma * G + reward # 更新累积回报
@@ -122,11 +122,11 @@ plt.plot(episodes_list, return_list)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('REINFORCE on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part8-Policy-based/REINFORCE_CartPole-v1.png')
 
 mv_return = rl_utils.moving_average(return_list, 9)
 plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('REINFORCE on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part8-Policy-based/REINFORCE_CartPole-v1_moving_average.png')
