@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import rl_utils
 from tqdm import tqdm
 
-
 class Qnet(torch.nn.Module):
     """only oe hidden layer"""
     def __init__(self, state_dim, hidden_dim, action_dim):
@@ -98,27 +97,7 @@ class DQN:
             self.target_q_net.load_state_dict(self.q_net.state_dict())
 
         self.count += 1
-
-
-
-
-
-lr = 1e-2
-num_episodes = 200
-hidden_dim = 128
-gamma = 0.98
-epsilon = 0.01
-target_update = 50
-buffer_size = 5000
-minimal_size = 1000
-batch_size = 64
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-
-env_name = 'Pendulum-v1'
-env = gym.make(env_name, render_mode='human')
-state_dim = env.observation_space.shape[0]
-action_dim = 11
+        
 # DQN cant handle sequent action, while this env has a sequent action space,
 # so we have to discrete it.
 def dis_to_con(discrete_action, env, action_dim):
@@ -168,9 +147,24 @@ def train_DQN(agent, env, num_episodes, replay_buffer, minimal_size, batch_size)
                 pbar.update(1)
     return return_list, max_q_value_list
 
+lr = 1e-2
+num_episodes = 200
+hidden_dim = 128
+gamma = 0.98
+epsilon = 0.01
+target_update = 50
+buffer_size = 5000
+minimal_size = 1000
+batch_size = 64
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+env_name = 'Pendulum-v1'
+env = gym.make(env_name)
+state_dim = env.observation_space.shape[0]
+action_dim = 11
+
 random.seed(30)
 np.random.seed(30)
-
 torch.manual_seed(30)
 replay_buffer = rl_utils.ReplayBuffer(buffer_size)
 agent = DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon, target_update, device, 'DuelingDQN')
@@ -181,7 +175,7 @@ plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('Dueling DQN on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part7-Optimized-DQN/Dueling-DQN_Pendulum-v1.png')
 
 frames_lsit = list(range(len(max_q_value_list)))
 plt.plot(frames_lsit, max_q_value_list)
@@ -190,4 +184,4 @@ plt.axhline(10, c='red', ls='--')
 plt.xlabel('Frames')
 plt.ylabel('Q value')
 plt.title('Dueling DQN on {}'.format(env_name))
-# plt.show()
+plt.savefig('datas/Part7-Optimized-DQN/Dueling-DQN_Pendulum-v1_moving_average.png')

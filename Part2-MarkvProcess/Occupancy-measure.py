@@ -1,5 +1,3 @@
-
-
 def occupancy(episodes, s, a, timestep_max, gamma):
     ''' 计算状态动作对（s,a）出现的频率,以此来估算策略的占用度量 '''
     rho = 0

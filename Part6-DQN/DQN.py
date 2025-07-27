@@ -1,12 +1,11 @@
 import random
-import gymnasium as gym
+import gym
 import numpy as np
 import collections
 from tqdm import tqdm
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-import os
 import rl_utils
 
 class ReplayBuffer:
@@ -92,7 +91,7 @@ batch_size = 64
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 env_name = 'CartPole-v1'
-env = gym.make(env_name, render_mode='human')
+env = gym.make(env_name)
 random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
@@ -106,7 +105,7 @@ for i in range(10):
     with tqdm(total=int(num_episodes / 10), desc='Iteration %d' % i) as pbar:
         for i_episode in range(int(num_episodes / 10)):
             episode_return = 0
-            state = env.reset(seed=42)
+            state = env.reset(seed=42)[0]
             done = False
             steps = 0
             while not done and steps < 200:
@@ -135,22 +134,17 @@ for i in range(10):
                 })
             pbar.update(1)
 
-# episodes_list = list(range(len(return_list)))
+episodes_list = list(range(len(return_list)))
 
-# rewards_directory = os.path.join("datas", "rewards")
-# rl_utils.recreate_directory(rewards_directory)
-# output_image = os.path.join(rewards_directory, "rewards.png")
-# output_optimized_image = os.path.join(rewards_directory, "rewards_optimized.png")
+plt.plot(episodes_list, return_list)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.savefig('datas/Part6-DQN/DQN_CartPole-v1.png')
 
-# plt.plot(episodes_list, return_list)
-# plt.xlabel('Episodes')
-# plt.ylabel('Returns')
-# plt.title('DQN on {}'.format(env_name))
-# plt.savefig(output_image)
-
-# mv_return = rl_utils.moving_average(return_list, 9)
-# plt.plot(episodes_list, mv_return)
-# plt.xlabel('Episodes')
-# plt.ylabel('Returns')
-# plt.title('DQN on {}'.format(env_name))
-# plt.savefig(output_optimized_image)
+mv_return = rl_utils.moving_average(return_list, 9)
+plt.plot(episodes_list, mv_return)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.savefig('datas/Part6-DQN/DQN_CartPole-v1_moving_average.png')

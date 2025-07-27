@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 import rl_utils
 from tqdm import tqdm
 
-from rl_utils import ReplayBuffer
-
-
 class Qnet(torch.nn.Module):
     """only oe hidden layer"""
     def __init__(self, state_dim, hidden_dim, action_dim):
@@ -86,24 +83,6 @@ class DQN:
 
         self.count += 1
 
-
-
-lr = 1e-2
-num_episodes = 200
-hidden_dim = 128
-gamma = 0.98
-epsilon = 0.01
-target_update = 50
-buffer_size = 5000
-minimal_size = 1000
-batch_size = 64
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-
-env_name = 'Pendulum-v1'
-env = gym.make(env_name, render_mode='human')
-state_dim = env.observation_space.shape[0]
-action_dim = 11
 # DQN cant handle sequent action, while this env has a sequent action space,
 # so we have to discrete it.
 def dis_to_con(discrete_action, env, action_dim):
@@ -122,7 +101,7 @@ def train_DQN(agent, env, num_episodes, replay_buffer, minimal_size, batch_size)
                 state = env.reset(seed = 0)[0]
                 done = False
                 steps = 0
-                while not  done and steps <200:
+                while not  done and steps < 200:
                     action = agent.take_action(state)
                     steps += 1
                     max_q_value = agent.max_q_value(state) * 0.005 + max_q_value * 0.995
@@ -145,30 +124,43 @@ def train_DQN(agent, env, num_episodes, replay_buffer, minimal_size, batch_size)
                 return_list.append(episode_return)
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({
-                        'episodes':
-                        '%d' % (num_episodes / 10 * i + i_episode + 1),
-                        'return':
-                        '%.3f' % np.mean(return_list[-10:])
+                        'episodes': '%d' % (num_episodes / 10 * i + i_episode + 1),
+                        'return': '%.3f' % np.mean(return_list[-10:])
                     })
                 pbar.update(1)
     return return_list, max_q_value_list
 
+lr = 1e-2
+num_episodes = 200
+hidden_dim = 128
+gamma = 0.98
+epsilon = 0.01
+target_update = 50
+buffer_size = 5000
+minimal_size = 1000
+batch_size = 64
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+env_name = 'Pendulum-v1'
+env = gym.make(env_name)
+state_dim = env.observation_space.shape[0]
+action_dim = 11
 random.seed(0)
 np.random.seed(0)
-env.reset(seed = 0)[0]
 torch.manual_seed(0)
 replay_buffer = rl_utils.ReplayBuffer(buffer_size)
 agent = DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon, target_update, device, 'DoubleDQN')
 return_list, max_q_value_list = train_DQN(agent, env, num_episodes, replay_buffer, minimal_size, batch_size)
 episodes_list = list(range(len(return_list)))
 mv_return = rl_utils.moving_average(return_list, 5)
+frames_lsit = list(range(len(max_q_value_list)))
+
 plt.plot(episodes_list, mv_return)
 plt.xlabel('Episodes')
 plt.ylabel('Returns')
 plt.title('Double DQN on {}'.format(env_name))
 plt.savefig('datas/Part7-Optimized-DQN/Double-DQN_Pendulum-v1.png')
 
-frames_lsit = list(range(len(max_q_value_list)))
 plt.plot(frames_lsit, max_q_value_list)
 plt.axhline(0, c='orange', ls='--')
 plt.axhline(10, c='red', ls='--')
