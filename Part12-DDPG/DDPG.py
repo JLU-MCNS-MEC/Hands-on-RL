@@ -21,7 +21,7 @@ class PolicyNet(torch.nn.Module):
 
 
 class QValueNet(torch.nn.Module):
-    def __init__(self, state_dim, hidden_dim, action_dim):
+    def __init__(self, state_dim, hidden_dim, action_dim=cfg.action_dim):
         super(QValueNet, self).__init__()
         self.fc1 = torch.nn.Linear(state_dim + action_dim, hidden_dim)
         self.fc2 = torch.nn.Linear(hidden_dim, hidden_dim)
@@ -82,8 +82,8 @@ class DDPG:
         actor_loss.backward()
         self.actor_optimizer.step()
 
-        self.soft_update(self.actor, self.target_actor)  # 软更新策略网络
-        self.soft_update(self.critic, self.target_critic)  # 软更新价值网络
+        self.soft_update(self.actor, self.target_actor)
+        self.soft_update(self.critic, self.target_critic)
         
 actor_lr = 3e-4
 critic_lr = 3e-3
